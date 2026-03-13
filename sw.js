@@ -1,6 +1,6 @@
 
 // Enkel SW for offline (valgfri). Husk å aktivere registreringen i index.html.
-const CACHE = 'b-kun-v1';
+const CACHE = 'b-kun-v2';
 const ASSETS = [
   './',
   './index.html',
