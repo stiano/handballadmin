@@ -1,9 +1,7 @@
 
 // ---------- Hjelpefunksjoner ----------
 const uniq = arr => Array.from(new Set(arr.map(s => s.trim()).filter(Boolean)));
-const splitList = (txt) => uniq(txt.replaceAll(",", "
-").split(/?
-/));
+const splitList = (txt) => uniq(txt.replaceAll(",", "").split(/?/));
 const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
 
 function parseInputs(){
