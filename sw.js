@@ -1,13 +1,22 @@
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open('handball-pwa-v2').then(cache => cache.addAll([
-      './', './index.html', './styles.css', './app.js', './manifest.json'
-    ]))
+// Enkel SW for offline (valgfri). Husk å aktivere registreringen i index.html.
+const CACHE = 'b-kun-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './style.css',
+  './script.js'
+];
+self.addEventListener('install', (e) => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+});
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
   );
 });
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(resp => resp || fetch(event.request))
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request))
   );
 });

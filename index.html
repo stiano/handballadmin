@@ -4,102 +4,87 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kampoppsett – Håndball (PWA)</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b5ed7"/>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Alternativ B – Keeperplan (én keeperbytte per kamp)</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>Kampoppsett – Håndball</h1>
-    <p>Offline app for rettferdig kampplan (Strategi A/B). Legg til på hjemskjermen for app‑opplevelse.</p>
-  </header>
+  <div class="wrap">
+    <h1>Alternativ B – Keeperplan</h1>
+    <p class="sub">To omganger per kamp (1 keeperbytte). Rettferdig fordeling, og ingen keeper i to kamper på rad.</p>
 
-  <section class="card">
-    <h2>Inndata</h2>
-    <div class="grid">
-      <label>Antall kamper
-        <input type="number" id="matches" min="1" max="20" value="4" />
-      </label>
-      <label>Varighet per kamp (min)
-        <input type="number" id="duration" step="0.5" min="6" max="60" value="15" />
-      </label>
-      <label>Keeperbytter per kamp
-        <select id="keeperSwitches">
-          <option value="0">0 (ingen bytte)</option>
-          <option value="1" selected>1 (halvveis)</option>
-          <option value="2">2</option>
-        </select>
-      </label>
-      <label>Strategi
-        <select id="strategy">
-          <option value="A">A – Presis rettferdighet (mikroblokker) + Coach‑visning</option>
-          <option value="B" selected>B – 3:00 bytter + kompensasjon</option>
-        </select>
-      </label>
-      <label class="checkbox">
-        <input type="checkbox" id="noConsecutiveGK" checked /> Ikke stå keeper i to kamper på rad
-      </label>
+    <div class="card">
+      <div class="row">
+        <div class="col">
+          <label for="players">Spillere (én per linje)</label>
+          <textarea id="players" rows="8" placeholder="Eksempel:
+Åshild
+Lykke
+Ida
+Mille
+Tara"></textarea>
+          <div class="hint">Navn må være unike. Rekkefølge brukes som utgangspunkt for rettferdig rotasjon.</div>
+        </div>
+        <div class="col">
+          <label for="keeperWish">Spillere som vil stå i mål (kommaseparert eller linjer)</label>
+          <textarea id="keeperWish" rows="8" placeholder="Eksempel:
+Åshild, Lykke, Ida"></textarea>
+          <div class="hint">Dersom feltet er tomt, antas alle er villige.</div>
+        </div>
+        <div class="col">
+          <label for="games">Antall kamper</label>
+          <input id="games" type="number" min="1" value="4" />
+          <label for="minutes" style="margin-top:10px;">Minutter per kamp</label>
+          <input id="minutes" type="number" min="1" value="30" />
+          <div class="sep"></div>
+          <label class="flex"><input id="avoidConsecutive" type="checkbox" checked />Unngå keeper to kamper på rad</label>
+          <label class="flex"><input id="strictBalance" type="checkbox" checked />Maksimalt jevn fordeling (±1)</label>
+        </div>
+      </div>
+
+      <div class="toolbar" style="margin-top:12px;">
+        <button class="btn primary" id="btnB">B – Lag plan</button>
+        <button class="btn ghost" id="btnClear">Tøm</button>
+        <span class="hint">Planen lages lokalt i nettleseren. Ingen data sendes ut.</span>
+      </div>
     </div>
 
-    <h3>Spillere</h3>
-    <div id="players"></div>
-    <div class="actions">
-      <button id="addPlayer" class="secondary">+ Legg til spiller</button>
-      <button id="resetExample" class="link">Fyll eksempel</button>
-      <button id="quickB" class="secondary">⚡ Bruk Alternativ B (laget vårt)</button>
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Keeper‑skade / hurtigreparasjon</h3>
+      <div class="row">
+        <div class="col">
+          <label for="injGame">Kamp # (1..N)</label>
+          <input id="injGame" type="number" min="1" value="1" />
+        </div>
+        <div class="col">
+          <label for="injHalf">Omgang</label>
+          <select id="injHalf">
+            <option value="1">1. omgang</option>
+            <option value="2">2. omgang</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="injName">Keeper som må erstattes (valgfritt – lar systemet finne)</label>
+          <input id="injName" type="text" placeholder="Hvis tomt: erstatt nåværende automatisk" />
+        </div>
+      </div>
+      <div class="toolbar" style="margin-top:12px;">
+        <button class="btn warn" id="btnInjury">Reparer plan for valgt kamp/omgang</button>
+        <span class="hint">Systemet finner nærmeste rettferdige erstatter som ikke bryter reglene.</span>
+      </div>
     </div>
 
-    <div class="actions">
-      <button id="generate" class="primary">Generer kampoppsett</button>
-      <button id="exportJson" class="secondary">Eksporter JSON</button>
-      <button id="exportCsv" class="secondary">Eksporter CSV</button>
-      <button id="clearCache" class="link">Tøm lagret data</button>
-    </div>
-  </section>
+    <div id="output" class="card" style="display:none;"></div>
+  </div>
 
-  <section class="card" id="injuryCard">
-    <h2>Nødplan – keeperskade</h2>
-    <p class="muted">Brukes hvis keeper blir skadet midt i en kamp. Appen foreslår rask løsning nå + kompensasjon for neste kamp.</p>
-    <div class="grid">
-      <label>Kamp
-        <input id="injMatch" type="number" min="1" value="1" />
-      </label>
-      <label>Tid (minutt.desimal) – f.eks. 7.5 for 7:30
-        <input id="injMinute" type="number" step="0.5" min="0" value="7.5" />
-      </label>
-      <label>Skadet keeper (navn)
-        <input id="injName" type="text" placeholder="Navn på keeper som er skadet" />
-      </label>
-    </div>
-    <div class="actions">
-      <button id="injCompute" class="primary">Beregn nødplan</button>
-    </div>
-    <div id="injuryOut"></div>
-  </section>
-
-  <section class="card" id="output" hidden>
-    <h2>Resultat</h2>
-    <p class="muted">Tips: Installer som app (iOS: «Legg til på Hjem‑skjerm», Android: «Installer app»)</p>
-    <div id="summary"></div>
-    <div id="schedules"></div>
-  </section>
-
-  <footer>
-    <small>© 2026 – Lokal PWA, ingen data forlater enheten din. | <a href="#" id="aboutLink">Om appen</a></small>
-  </footer>
-
-  <dialog id="about">
-    <h3>Om appen</h3>
-    <ul>
-      <li><b>Strategi A</b>: automatisk valg av «riktig» blokklengde (rettferdighet per kamp), vises også som enkel Coach‑plan.</li>
-      <li><b>Strategi B</b>: alltid 3:00‑bytter; små avvik kompenseres mellom kamper. Hurtigknapp setter opp laget deres.</li>
-      <li><b>Nødplan keeperskade</b>: anbefaler umiddelbar erstatter + hva du bør gjøre i neste kamp for balanse.</li>
-      <li>Fungerer offline (PWA). Data lagres lokalt.</li>
-    </ul>
-    <div class="actions"><button id="closeAbout">Lukk</button></div>
-  </dialog>
-
-  <script src="app.js"></script>
+  <script src="script.js"></script>
+  <!-- Valgfritt: PWA service worker. Fjern kommentaren under for å aktivere offline-støtte.
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(()=>{});
+      });
+    }
+  </script>
+  -->
 </body>
 </html>
