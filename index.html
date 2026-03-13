@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Alternativ B – Keeperplan (én keeperbytte per kamp)</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.v2.css" />
 </head>
 <body>
   <div class="wrap">
@@ -76,15 +76,7 @@ Tara"></textarea>
     <div id="output" class="card" style="display:none;"></div>
   </div>
 
-  <script src="script.js"></script>
-  <!-- Valgfritt: PWA service worker. Fjern kommentaren under for å aktivere offline-støtte.
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(()=>{});
-      });
-    }
-  </script>
-  -->
+  <script src="script.v2.js"></script>
+  <!-- Service worker er AV for å unngå caching-problemer. Aktiver kun hvis du trenger offline. -->
 </body>
 </html>
